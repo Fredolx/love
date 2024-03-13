@@ -7,11 +7,4 @@ import { invoke } from '@tauri-apps/api'
 })
 export class AppComponent {
   title = 'ng-love';
-
-  click() {
-    console.log("sending");
-    invoke('greet', { name: 'Fred!' })
-      // `invoke` returns a Promise
-      .then((response) => console.log(response))
-  }
 }
