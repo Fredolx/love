@@ -4,3 +4,23 @@
     width: 100%;
     user-select: none;
 }
+
+.box:hover {
+    background: #007bff;
+    cursor: pointer;
+    animation: popUp 0.3s ease forwards;
+}
+
+.box:not(:hover) {
+    animation: shrinkDown 0.3s ease forwards;
+}
+
+@keyframes popUp {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+@keyframes shrinkDown {
+    0% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
