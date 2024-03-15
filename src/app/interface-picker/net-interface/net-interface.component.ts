@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Interface } from '../models/interface';
+import { Interface } from '../../models/interface';
 
 @Component({
   selector: 'app-net-interface',

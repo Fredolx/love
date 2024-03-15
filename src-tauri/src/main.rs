@@ -10,7 +10,7 @@ fn main() {
     .expect("error while running tauri application");
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_interfaces() -> Vec<Interface> {
     return arp::get_interfaces().iter().filter(|f| f.ips.len() > 0).map(|f| Interface {
     name: f.name.clone(),

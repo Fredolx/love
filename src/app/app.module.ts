@@ -3,14 +3,18 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { NetInterfaceComponent } from './net-interface/net-interface.component';
 import { InterfacePickerComponent } from './interface-picker/interface-picker.component';
+import { NetInterfaceComponent } from './interface-picker/net-interface/net-interface.component';
+import { LanComponent } from './lan/lan.component';
+import { LanItemComponent } from './lan/lan-item/lan-item.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NetInterfaceComponent,
-    InterfacePickerComponent
+    InterfacePickerComponent,
+    LanComponent,
+    LanItemComponent
   ],
   imports: [
     BrowserModule,
