@@ -9,3 +9,7 @@ body {
     font-family: Hack;
     src: url(assets/Hack-Regular.ttf);
 }
+
+::-webkit-scrollbar {
+    display: none;
+}
