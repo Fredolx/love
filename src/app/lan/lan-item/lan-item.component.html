@@ -1,1 +1,15 @@
-<p>lan-item works!</p>
+<div class="p-2" [ngClass]="{box: !beingKilled(), kill: beingKilled()}">
+    <div>{{lanClient.ip}}</div>
+    <div class="row">
+        <label class="col-2 col-md-1 col-lg-1" for="ip">IP:</label>
+        <span class="col" id="ip">{{lanClient.hostname}}</span>
+    </div>
+    <div class="row">
+        <label class="col-2 col-md-1 col-lg-1" for="mac">MAC:</label>
+        <span class="col" id="mac">{{lanClient.mac}}</span>
+    </div>
+    <div class="row">
+        <label class="col-2 col-md-1 col-lg-1" for="vendor">vendor:</label>
+        <span class="col" id="vendor">{{lanClient.vendor}}</span>
+    </div>
+</div>

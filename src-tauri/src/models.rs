@@ -5,3 +5,10 @@ pub struct Interface {
     pub ip: String,
     pub mac: String
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LanClient {
+    pub hostname: Option<String>,
+    pub ip: String,
+    pub vendor: Option<String>
+}

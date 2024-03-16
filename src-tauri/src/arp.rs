@@ -27,10 +27,10 @@ pub struct TargetDetails {
 }
 
 pub fn get_interfaces() -> Vec<NetworkInterface> {
-   return pnet_datalink::interfaces();
-} 
+    return pnet_datalink::interfaces();
+}
 
-pub fn scan(interface: &NetworkInterface) {
+pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
     let channel_config = pnet_datalink::Config {
         read_timeout: Some(Duration::from_millis(DATALINK_RCV_TIMEOUT)),
         ..pnet_datalink::Config::default()
@@ -73,7 +73,7 @@ pub fn scan(interface: &NetworkInterface) {
         eprintln!("Failed to close receive thread ({:?})", error);
         process::exit(1);
     });
-    println!("{:?}", target_details.into_iter().map(|f| format!("{} {}", f.ipv4.to_string(), f.hostname.unwrap_or_default().to_string()) ).collect::<Vec<String>>());
+    target_details
 }
 
 fn get_ip_addresses(cidr_str: String) -> Vec<Ipv4Addr> {
@@ -223,14 +223,16 @@ fn receive_arp_responses(
         .into_values()
         .map(|mut target_detail| {
             target_detail.hostname = find_hostname(target_detail.ipv4);
-            //target_detail.vendor = vendor_list.search_by_mac(&target_detail.mac);
+            target_detail.vendor = find_mac(target_detail.mac.to_string());
             target_detail
         })
         .collect();
 
-    // The response summary can be used to display analytics related to the
-    // performed ARP scans (packet counts, timings, ...)
     target_details
+}
+
+fn find_mac(mac: String) -> Option<String> {
+    return Some("".to_string());
 }
 
 fn find_hostname(ipv4: Ipv4Addr) -> Option<String> {
@@ -242,11 +244,8 @@ fn find_hostname(ipv4: Ipv4Addr) -> Option<String> {
             if hostname.parse::<IpAddr>().is_ok() {
                 return None;
             }
-
             Some(hostname)
         }
         Err(_) => None,
     }
 }
-
-

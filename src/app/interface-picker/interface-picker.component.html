@@ -1,7 +1,6 @@
 <div class="container mt-5">
-    <ng-container *ngFor="let inter of interfaces">
-        <div class="mt-3">
-            <app-net-interface (click)="selectInterface(inter)" [interface]="inter"></app-net-interface>
-        </div>
-    </ng-container>
+    <h2>Pick a network interface</h2>
+    <div *ngFor="let inter of interfaces" class="mt-3">
+        <app-net-interface (click)="selectInterface(inter)" [interface]="inter"></app-net-interface>
+    </div>
 </div>

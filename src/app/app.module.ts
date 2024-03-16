@@ -7,6 +7,7 @@ import { InterfacePickerComponent } from './interface-picker/interface-picker.co
 import { NetInterfaceComponent } from './interface-picker/net-interface/net-interface.component';
 import { LanComponent } from './lan/lan.component';
 import { LanItemComponent } from './lan/lan-item/lan-item.component';
+import { LoadingComponent } from './loading/loading.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { LanItemComponent } from './lan/lan-item/lan-item.component';
     NetInterfaceComponent,
     InterfacePickerComponent,
     LanComponent,
-    LanItemComponent
+    LanItemComponent,
+    LoadingComponent
   ],
   imports: [
     BrowserModule,
