@@ -1,15 +1,19 @@
 <div class="p-2" [ngClass]="{box: !beingKilled(), kill: beingKilled()}">
-    <div>{{lanClient.ip}}</div>
+    <div></div>
     <div class="row">
-        <label class="col-2 col-md-1 col-lg-1" for="ip">Hostname:</label>
-        <span class="col" id="hostname">{{lanClient.hostname}}</span>
+        <label class="col-2 col-md-2 col-lg-1" for="ip">IP:</label>
+        <span class="col" id="hostname">{{lanClient.ip}}</span>
     </div>
     <div class="row">
-        <label class="col-2 col-md-1 col-lg-1" for="mac">MAC:</label>
+        <label class="col-2 col-md-2 col-lg-1" for="mac">MAC:</label>
         <span class="col" id="mac">{{lanClient.mac}}</span>
     </div>
     <div class="row">
-        <label class="col-2 col-md-1 col-lg-1" for="vendor">Vendor:</label>
+        <label class="col-2 col-md-2 col-lg-1" for="ip">Hostname:</label>
+        <span class="col" id="hostname">{{lanClient.hostname}}</span>
+    </div>
+    <div class="row">
+        <label class="col-2 col-md-2 col-lg-1" for="vendor">Vendor:</label>
         <span class="col" id="vendor">{{lanClient.vendor}}</span>
     </div>
 </div>

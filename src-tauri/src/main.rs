@@ -1,10 +1,16 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::{collections::HashMap, sync::OnceLock};
 use arp::scan;
 use models::{Interface, LanClient};
 mod arp;
 mod models;
+mod vendor;
+
+static VENDORS: OnceLock<HashMap<String, String>> = OnceLock::new();
+
 fn main() {
+    VENDORS.set(vendor::get_vendors().unwrap()).unwrap();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![get_interfaces, get_lan])
         .run(tauri::generate_context!())
@@ -36,6 +42,7 @@ fn get_lan(inter: String) -> Vec<LanClient> {
             ip: f.ipv4.to_string(),
             hostname: f.hostname,
             vendor: f.vendor,
+            mac: f.mac.to_string()
         })
         .collect();
 }

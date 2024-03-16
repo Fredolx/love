@@ -10,5 +10,6 @@ pub struct Interface {
 pub struct LanClient {
     pub hostname: Option<String>,
     pub ip: String,
+    pub mac: String,
     pub vendor: Option<String>
 }

@@ -13,6 +13,8 @@ use pnet::packet::{MutablePacket, Packet};
 use pnet_datalink::{DataLinkReceiver, DataLinkSender, MacAddr, NetworkInterface};
 use std::io::ErrorKind::TimedOut;
 
+use crate::VENDORS;
+
 const DATALINK_RCV_TIMEOUT: u64 = 500;
 const ARP_PACKET_SIZE: usize = 28;
 const ETHERNET_STD_PACKET_SIZE: usize = 42;
@@ -61,12 +63,12 @@ pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
         send_arp_request(&mut tx, &interface, source_ip, ip_address);
         thread::sleep(Duration::from_millis(INTERVAL));
     }
-
     let mut sleep_ms_mount: u64 = 0;
     while sleep_ms_mount < TIMEOUT {
         thread::sleep(Duration::from_millis(100));
         sleep_ms_mount += 100;
     }
+
     timed_out.store(true, Ordering::Relaxed);
 
     let target_details = arp_responses.join().unwrap_or_else(|error| {
@@ -217,8 +219,6 @@ fn receive_arp_responses(
         }
     }
 
-    // For each target found, enhance each item with additional results
-    // results such as the hostname & MAC vendor.
     let target_details = discover_map
         .into_values()
         .map(|mut target_detail| {
@@ -232,7 +232,8 @@ fn receive_arp_responses(
 }
 
 fn find_mac(mac: String) -> Option<String> {
-    return Some("".to_string());
+    let mac_signature = &mac.to_uppercase()[0..8];
+    return VENDORS.get().unwrap().get(mac_signature).cloned();
 }
 
 fn find_hostname(ipv4: Ipv4Addr) -> Option<String> {
