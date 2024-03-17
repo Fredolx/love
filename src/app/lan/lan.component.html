@@ -1,6 +1,6 @@
 <app-loading *ngIf="loading" [center]="true"></app-loading>
 <div *ngIf="!loading" class="container mt-5">
-    <h2>Choose a device to kill (or roommate's inconvenient TV)</h2>
+    <h2>Choose a device to kill</h2>
     <div class="mt-3" *ngFor="let item of lanClients">
         <app-lan-item [lanClient]="item" (click)="kill(item)"></app-lan-item>
     </div>

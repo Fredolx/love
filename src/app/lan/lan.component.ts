@@ -31,5 +31,9 @@ export class LanComponent implements OnInit {
 
   kill(client: LanClient) {
     this.memory.deviceToKill = client;
+    invoke("kill_device", {
+      client: client,
+      inter: this.memory.selectedInterface?.name,
+    }).then(_ => _);
   }
 }

