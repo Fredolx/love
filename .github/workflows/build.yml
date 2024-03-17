@@ -43,7 +43,35 @@ jobs:
       run: |
         npm run build
         npm run tauri build
-        ls
+
+    - uses: actions/upload-artifact@v4.3.1
+      if: matrix.os == 'macos-latest'
+      with:
+        name: love-macos-amd64
+        path: src-tauri/target/release/bundle/dmg/*.dmg
+        retention-days: 7
+
+    - uses: actions/upload-artifact@v4.3.1
+      if: matrix.os == 'windows-latest'
+      with:
+        name: love-windows-amd64
+        path: src-tauri/target/release/bundle/msi/*.msi
+        retention-days: 7
+
+    - uses: actions/upload-artifact@v4.3.1
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: love-linux-deb-amd64
+        path: src-tauri/target/release/bundle/deb/*.deb
+        retention-days: 7
+
+    - uses: actions/upload-artifact@v4.3.1
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: love-linux-appImage-amd64
+        path: src-tauri/target/release/bundle/appimage/*.AppImage
+        retention-days: 7
+    
 
     
     
