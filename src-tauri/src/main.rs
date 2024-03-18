@@ -54,7 +54,7 @@ fn find_interface_by_name(inter_str: String) -> NetworkInterface {
 #[tauri::command(async)]
 fn get_lan(inter: String) -> Vec<LanClient> {
     let interface = find_interface_by_name(inter);
-    let mut lan_clients: Vec<LanClient> = scan(&interface)
+    let lan_clients: Vec<LanClient> = scan(&interface)
         .into_iter()
         .map(|f| LanClient {
             ip: f.ipv4.to_string(),

