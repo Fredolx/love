@@ -39,7 +39,7 @@ fn get_interfaces() -> Vec<Interface> {
         .filter(|f| f.ips.len() > 0)
         .map(|f| Interface {
             name: f.name.clone(),
-            ip: f.ips.first().unwrap().to_string(),
+            ip: f.ips.iter().find(|f| f.is_ipv4()).unwrap_or(f.ips.first().unwrap()).to_string(),
             mac: f.mac.unwrap_or_default().to_string(),
         })
         .collect();

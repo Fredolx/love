@@ -68,7 +68,7 @@ pub fn kill(client: TargetDetails, gateway: TargetDetails, interface: &NetworkIn
         for p in &packets {
             tx.send_to(p.packet(), Some(interface.clone()));
         }
-        thread::sleep(Duration::from_millis(5000));
+        thread::sleep(Duration::from_millis(1500));
     }
 }
 
@@ -141,6 +141,7 @@ pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
     let source_ip = find_source_ip(&interface);
 
     let cidr = get_cidr(interface);
+    println!("{}", cidr);
 
     let ip_addresses = get_ip_addresses(cidr);
 
@@ -188,10 +189,11 @@ fn find_source_ip(network_interface: &NetworkInterface) -> Ipv4Addr {
 }
 
 fn get_cidr(interface: &NetworkInterface) -> String {
+    let ip = interface.ips.iter().find(|f| f.is_ipv4()).unwrap();
     return format!(
         "{}/{}",
-        interface.ips.first().unwrap().ip().to_string(),
-        interface.ips.first().unwrap().prefix().to_string()
+        ip.ip().to_string(),
+        ip.prefix().to_string()
     );
 }
 
