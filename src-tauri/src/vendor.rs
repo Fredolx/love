@@ -1,8 +1,8 @@
-use std::{collections::HashMap, fs::File, io::{self, BufRead, BufReader}};
+use std::{collections::HashMap, fs::File, io::{self, BufRead, BufReader}, path::{Path, PathBuf}};
 
-pub fn get_vendors() -> Result<HashMap<String, String>, io::Error> {
+pub fn get_vendors(path: PathBuf) -> Result<HashMap<String, String>, io::Error> {
     let mut map : HashMap<String, String> = HashMap::new();
-    let file = File::open("vendors.txt")?;
+    let file = File::open(path)?;
     let reader = BufReader::new(file);
 
     for line in reader.lines() {

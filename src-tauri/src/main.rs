@@ -13,20 +13,21 @@ mod models;
 mod vendor;
 
 static VENDORS: OnceLock<HashMap<String, String>> = OnceLock::new();
-#[derive(Default)]
-struct State {
-    lan_clients: Arc<Mutex<Vec<LanClient>>>,
-}
 fn main() {
     netdev::get_interfaces()
         .into_iter()
         .for_each(|f| println!("{}", f.name));
-    VENDORS.set(vendor::get_vendors().unwrap()).unwrap();
     tauri::Builder::default()
-        .manage(State {
-            ..Default::default()
+        .setup(|app| {
+            let vendors_path = app.path_resolver().resolve_resource("vendors.txt").unwrap();
+            VENDORS.set(vendor::get_vendors(vendors_path).unwrap()).unwrap();
+            Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_interfaces, get_lan, kill_device])
+        .invoke_handler(tauri::generate_handler![
+            get_interfaces,
+            get_lan,
+            kill_device
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
