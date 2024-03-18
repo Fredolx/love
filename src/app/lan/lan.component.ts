@@ -13,7 +13,7 @@ export class LanComponent implements OnInit {
   lanClients: LanClient[] = []
   loading: boolean = true;
 
-  constructor(private memory: MemoryService, private router: Router) {
+  constructor(public memory: MemoryService, private router: Router) {
 
   }
 
@@ -27,13 +27,5 @@ export class LanComponent implements OnInit {
       .finally(() => {
         this.loading = false;
       });
-  }
-
-  kill(client: LanClient) {
-    this.memory.deviceToKill = client;
-    invoke("kill_device", {
-      client: client,
-      inter: this.memory.selectedInterface?.name,
-    }).then(_ => _);
   }
 }

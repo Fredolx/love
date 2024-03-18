@@ -8,6 +8,7 @@ import { NetInterfaceComponent } from './interface-picker/net-interface/net-inte
 import { LanComponent } from './lan/lan.component';
 import { LanItemComponent } from './lan/lan-item/lan-item.component';
 import { LoadingComponent } from './loading/loading.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { LoadingComponent } from './loading/loading.component';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

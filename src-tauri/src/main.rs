@@ -1,32 +1,50 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+
 use arp::scan;
 // use arp::kill;
 use models::{Interface, LanClient};
 use pnet_datalink::NetworkInterface;
+
 use std::{
     collections::HashMap,
-    sync::{Arc, Mutex, OnceLock},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex, OnceLock,
+    },
+    time::Duration,
 };
 mod arp;
 mod models;
 mod vendor;
 
 static VENDORS: OnceLock<HashMap<String, String>> = OnceLock::new();
+
+pub struct State {
+    threads: Arc<Mutex<HashMap<String, LoveThreads>>>,
+}
+
+pub struct LoveThreads {
+    timed_out: Arc<AtomicBool>,
+}
+
 fn main() {
-    netdev::get_interfaces()
-        .into_iter()
-        .for_each(|f| println!("{}", f.name));
     tauri::Builder::default()
         .setup(|app| {
             let vendors_path = app.path_resolver().resolve_resource("vendors.txt").unwrap();
-            VENDORS.set(vendor::get_vendors(vendors_path).unwrap()).unwrap();
+            VENDORS
+                .set(vendor::get_vendors(vendors_path).unwrap())
+                .unwrap();
             Ok(())
+        })
+        .manage(State {
+            threads: Arc::new(Mutex::new(HashMap::new())),
         })
         .invoke_handler(tauri::generate_handler![
             get_interfaces,
             get_lan,
-            kill_device
+            kill_device,
+            stop_kill_device
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -39,7 +57,12 @@ fn get_interfaces() -> Vec<Interface> {
         .filter(|f| f.ips.len() > 0)
         .map(|f| Interface {
             name: f.name.clone(),
-            ip: f.ips.iter().find(|f| f.is_ipv4()).unwrap_or(f.ips.first().unwrap()).to_string(),
+            ip: f
+                .ips
+                .iter()
+                .find(|f| f.is_ipv4())
+                .unwrap_or(f.ips.first().unwrap())
+                .to_string(),
             mac: f.mac.unwrap_or_default().to_string(),
         })
         .collect();
@@ -68,7 +91,7 @@ fn get_lan(inter: String) -> Vec<LanClient> {
 }
 
 #[tauri::command(async)]
-fn kill_device(client: LanClient, inter: String) {
+fn kill_device(client: LanClient, inter: String, delay: u64, state: tauri::State<State>) {
     let interface = find_interface_by_name(inter);
     let gateway = arp::find_gateway(&interface);
     arp::kill(
@@ -80,5 +103,20 @@ fn kill_device(client: LanClient, inter: String) {
         },
         gateway,
         &interface,
-    )
+        Duration::from_millis(delay),
+        state,
+    );
+}
+
+#[tauri::command(async)]
+fn stop_kill_device(client: LanClient, state: tauri::State<State>) -> Result<(), String> {
+    state
+        .threads
+        .lock()
+        .unwrap()
+        .get(&client.ip)
+        .ok_or(format!("Failed to get {} loveThread from state hashmap", client.ip))?
+        .timed_out
+        .store(true, Ordering::Relaxed);
+    Ok(())
 }

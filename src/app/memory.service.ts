@@ -10,4 +10,5 @@ export class MemoryService {
   constructor() { }
   selectedInterface?: Interface
   deviceToKill?: LanClient
+  delay: number = 1500;
 }

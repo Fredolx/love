@@ -1,4 +1,4 @@
-<div class="p-2" [ngClass]="{box: !beingKilled(), kill: beingKilled()}">
+<div class="p-2" style="position: relative;" (click)="kill()" [ngClass]="{box: !killing, kill: killing}">
     <div></div>
     <div class="row">
         <label class="col-3 col-md-2 col-lg-2" for="ip">IP:</label>
@@ -16,4 +16,8 @@
         <label class="col-3 col-md-2 col-lg-2" for="vendor">Vendor:</label>
         <span class="col" id="vendor">{{lanClient.vendor}}</span>
     </div>
+    <div class="stop">
+        <button *ngIf="canKillStop" (click)="stopKill()"
+        class="btn btn-primary">Stop</button>
+    </div>  
 </div>

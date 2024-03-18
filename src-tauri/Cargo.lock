@@ -1491,6 +1491,7 @@ dependencies = [
 name = "love-rs"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dns-lookup",
  "ipnetwork",
  "lazy_static",
