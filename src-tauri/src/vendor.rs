@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::{self, BufRead, BufReader}, path::{Path, PathBuf}};
+use std::{collections::HashMap, fs::File, io::{self, BufRead, BufReader}, path::PathBuf};
 
 pub fn get_vendors(path: PathBuf) -> Result<HashMap<String, String>, io::Error> {
     let mut map : HashMap<String, String> = HashMap::new();

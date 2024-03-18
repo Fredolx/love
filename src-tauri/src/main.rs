@@ -110,6 +110,7 @@ fn kill_device(client: LanClient, inter: String, delay: u64, state: tauri::State
 
 #[tauri::command(async)]
 fn stop_kill_device(client: LanClient, state: tauri::State<State>) -> Result<(), String> {
+    println!("stopping murder of {}", client.ip);
     state
         .threads
         .lock()

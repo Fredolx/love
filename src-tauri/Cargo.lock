@@ -1498,6 +1498,7 @@ dependencies = [
  "packet_rs",
  "pnet",
  "pnet_datalink",
+ "rand 0.8.5",
  "serde",
  "serde_json",
  "tauri",

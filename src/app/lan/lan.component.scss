@@ -66,6 +66,22 @@ input[type="range"]:focus::-moz-range-thumb {
     box-shadow: 0 0 0 13px rgba(226, 24, 6, 0.1)
 }
 
+.refresh {
+    bottom: .1em;
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #007bff;
+    cursor: pointer;
+    transition-duration: 0.8s;
+    transition-property: transform;
+}
+
+.refresh:hover {
+    transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+}
+
 /*=============
   Aesthetics 
   =========================*/
