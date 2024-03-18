@@ -61,7 +61,7 @@ pub fn kill(
     state: tauri::State<State>,
 ) {
     println!("victim's IP {}", client.ipv4);
-    println!("victim's MAC{}", client.mac);
+    println!("victim's MAC {}", client.mac);
     println!("gateway's IP {}", gateway.ipv4);
     println!("gateway's MAC {}", gateway.mac);
     let source_mac: MacAddr = "ba:3b:bb:20:18:9a".parse().unwrap();

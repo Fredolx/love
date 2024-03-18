@@ -23,7 +23,7 @@ export class LanItemComponent {
     invoke("kill_device", {
       client: this.lanClient,
       inter: this.memory.selectedInterface?.name,
-      delay: 1000
+      delay: this.memory.delay
     }).then().finally(() => {
       this.killing = false
     });
