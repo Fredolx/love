@@ -13,4 +13,5 @@ export class MemoryService {
   deviceToKill?: LanClient
   delay: number = 1500;
   cancelSubject: Subject<boolean> = new Subject<boolean>(); 
+  skippedSelectInteface: boolean = false;
 }

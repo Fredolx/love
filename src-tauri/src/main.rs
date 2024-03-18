@@ -54,14 +54,15 @@ fn main() {
 fn get_interfaces() -> Vec<Interface> {
     return arp::get_interfaces()
         .iter()
-        .filter(|f| f.ips.len() > 0)
+        .filter(|f| f.ips.iter().filter(|f| f.is_ipv4() && f.ip().to_string() != "127.0.0.1").count() > 0)
         .map(|f| Interface {
             name: f.name.clone(),
             ip: f
                 .ips
                 .iter()
                 .find(|f| f.is_ipv4())
-                .unwrap_or(f.ips.first().unwrap())
+                .unwrap()
+                .ip()
                 .to_string(),
             mac: f.mac.unwrap_or_default().to_string(),
         })

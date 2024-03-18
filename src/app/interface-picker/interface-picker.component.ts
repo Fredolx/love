@@ -13,12 +13,21 @@ export class InterfacePickerComponent implements OnInit {
   interfaces: Interface[] = []
 
   constructor(private memory: MemoryService, private router: Router) {
-    
+
   }
 
   ngOnInit(): void {
     invoke('get_interfaces')
-      .then((response) => this.interfaces = response as Interface[])
+      .then((response) => {
+        let interfaces = response as Interface[];
+        if (interfaces.length == 1) {
+          this.memory.skippedSelectInteface = true;
+          this.memory.selectedInterface = interfaces[0];
+          this.router.navigateByUrl("lan");
+        }
+        else 
+          this.interfaces = interfaces;
+      })
   }
 
   selectInterface(inter: Interface) {

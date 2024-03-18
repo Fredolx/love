@@ -84,8 +84,14 @@ fn generate_random_mac_addr() -> MacAddr {
     let mut rng = rand::thread_rng();
     let mac_bytes: Vec<u8> = (0..6).map(|_| rng.gen::<u8>()).collect();
 
-    return MacAddr(mac_bytes[0], mac_bytes[1],
-        mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]);
+    return MacAddr(
+        mac_bytes[0],
+        mac_bytes[1],
+        mac_bytes[2],
+        mac_bytes[3],
+        mac_bytes[4],
+        mac_bytes[5],
+    );
 }
 
 pub fn spam_arp_replies(
@@ -173,7 +179,6 @@ pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
 
     let cidr = get_cidr(interface);
     println!("{}", cidr);
-
     let ip_addresses = get_ip_addresses(cidr);
 
     for ip_address in ip_addresses {
@@ -192,7 +197,10 @@ pub fn scan(interface: &NetworkInterface) -> Vec<TargetDetails> {
         eprintln!("Failed to close receive thread ({:?})", error);
         process::exit(1);
     });
-    target_details
+    return target_details
+        .into_iter()
+        .filter(|f| f.ipv4.to_string() != source_ip.to_string())
+        .collect();
 }
 
 fn get_ip_addresses(cidr_str: String) -> Vec<Ipv4Addr> {
