@@ -1,6 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-
 use arp::scan;
 // use arp::kill;
 use models::{Interface, LanClient};
@@ -8,6 +7,8 @@ use pnet_datalink::NetworkInterface;
 
 use std::{
     collections::HashMap,
+    env::{self, consts::OS},
+    path::Path,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex, OnceLock,
@@ -44,7 +45,8 @@ fn main() {
             get_interfaces,
             get_lan,
             kill_device,
-            stop_kill_device
+            stop_kill_device,
+            npcap_installed
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -54,19 +56,28 @@ fn main() {
 fn get_interfaces() -> Vec<Interface> {
     return arp::get_interfaces()
         .iter()
-        .filter(|f| f.ips.iter().filter(|f| f.is_ipv4() && f.ip().to_string() != "127.0.0.1").count() > 0)
+        .filter(|f| {
+            f.ips
+                .iter()
+                .filter(|f| f.is_ipv4() && f.ip().to_string() != "127.0.0.1")
+                .count()
+                > 0
+        })
         .map(|f| Interface {
             name: f.name.clone(),
-            ip: f
-                .ips
-                .iter()
-                .find(|f| f.is_ipv4())
-                .unwrap()
-                .ip()
-                .to_string(),
+            ip: f.ips.iter().find(|f| f.is_ipv4()).unwrap().ip().to_string(),
             mac: f.mac.unwrap_or_default().to_string(),
         })
         .collect();
+}
+
+#[tauri::command(async)]
+fn npcap_installed() -> bool {
+    if env::consts::OS == "windows" {
+        return Path::new("C:\\Windows\\System32\\Npcap\\Packet.dll").exists();
+    } else {
+        return true;
+    }
 }
 
 fn find_interface_by_name(inter_str: String) -> NetworkInterface {
@@ -117,7 +128,10 @@ fn stop_kill_device(client: LanClient, state: tauri::State<State>) -> Result<(),
         .lock()
         .unwrap()
         .get(&client.ip)
-        .ok_or(format!("Failed to get {} loveThread from state hashmap", client.ip))?
+        .ok_or(format!(
+            "Failed to get {} loveThread from state hashmap",
+            client.ip
+        ))?
         .timed_out
         .store(true, Ordering::Relaxed);
     Ok(())

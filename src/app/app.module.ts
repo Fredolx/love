@@ -9,6 +9,7 @@ import { LanComponent } from './lan/lan.component';
 import { LanItemComponent } from './lan/lan-item/lan-item.component';
 import { LoadingComponent } from './loading/loading.component';
 import { FormsModule } from '@angular/forms';
+import { NpcapComponent } from './npcap/npcap.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { FormsModule } from '@angular/forms';
     InterfacePickerComponent,
     LanComponent,
     LanItemComponent,
-    LoadingComponent
+    LoadingComponent,
+    NpcapComponent
   ],
   imports: [
     BrowserModule,

@@ -11,7 +11,10 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "all": false,
+      "shell": {
+        "open": true
+      }
     },
     "bundle": {
       "active": true,
@@ -61,7 +64,9 @@
         "height": 600,
         "resizable": true,
         "title": "love",
-        "width": 800
+        "width": 800,
+        "minWidth": 600,
+        "minHeight": 400
       }
     ]
   }

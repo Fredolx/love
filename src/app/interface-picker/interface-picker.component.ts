@@ -17,18 +17,25 @@ export class InterfacePickerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    invoke('get_interfaces')
-      .then((response) => {
-        let interfaces = response as Interface[];
-        if (interfaces.length == 1) {
-          this.memory.skippedSelectInteface = true;
-          this.memory.selectedInterface = interfaces[0];
-          this.router.navigateByUrl("lan");
-        }
-        else 
-          this.interfaces = interfaces;
-      })
+    invoke('npcap_installed').then(res => {
+      if (!res) {
+        this.router.navigateByUrl("npcap");
+        return;
+      }
+      invoke('get_interfaces')
+        .then((response) => {
+          let interfaces = response as Interface[];
+          if (interfaces.length == 1) {
+            this.memory.skippedSelectInteface = true;
+            this.memory.selectedInterface = interfaces[0];
+            this.router.navigateByUrl("lan");
+          }
+          else
+            this.interfaces = interfaces;
+        });
+    });
   }
+
 
   selectInterface(inter: Interface) {
     this.memory.selectedInterface = inter;
