@@ -6,8 +6,8 @@
     "distDir": "../dist/ng-love/browser"
   },
   "package": {
-    "productName": "love",
-    "version": "0.3.2"
+    "productName": "Love",
+    "version": "0.3.3"
   },
   "tauri": {
     "allowlist": {
@@ -32,7 +32,7 @@
         "icons/icon.ico"
       ],
       "identifier": "com.github.fredolx.love",
-      "longDescription": "",
+      "longDescription": "Kill the internet of any device on your network",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -63,7 +63,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "love",
+        "title": "Love",
         "width": 800,
         "minWidth": 600,
         "minHeight": 400
